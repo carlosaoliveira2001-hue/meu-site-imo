@@ -21,16 +21,25 @@ export function HomeClient({ featuredProperties }: HomeClientProps) {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-primary text-primary-foreground py-24 md:py-32">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
+      <section 
+        className="relative text-white py-32 md:py-40 section-fade"
+        style={{
+          backgroundImage: 'url(/modern-house-exterior-with-pool.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        {/* Overlay escuro para legibilidade do texto */}
+        <div className="absolute inset-0 bg-black/50" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold text-balance leading-tight">{t.heroTitle}</h1>
-            <p className="text-lg md:text-xl text-primary-foreground/90 text-pretty leading-relaxed">
+            <p className="text-lg md:text-xl text-white/90 text-pretty leading-relaxed">
               {t.heroDescription}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button asChild size="lg" variant="secondary" className="gap-2">
+              <Button asChild size="lg" variant="secondary" className="gap-2 btn-hover">
                 <Link href="/imoveis">
                   <Search className="h-5 w-5" />
                   {t.viewAllProperties}
@@ -40,7 +49,7 @@ export function HomeClient({ featuredProperties }: HomeClientProps) {
                 asChild
                 size="lg"
                 variant="outline"
-                className="gap-2 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                className="gap-2 bg-white text-primary hover:bg-white/90 border-white btn-hover"
               >
                 <a
                   href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(t.whatsappGreeting)}`}
@@ -57,23 +66,23 @@ export function HomeClient({ featuredProperties }: HomeClientProps) {
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 md:py-24">
+      <section className="py-20 md:py-28 section-fade">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{t.featuredTitle}</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance text-foreground">{t.featuredTitle}</h2>
             <p className="text-lg text-muted-foreground text-pretty max-w-2xl mx-auto leading-relaxed">
               {t.featuredDescription}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
           </div>
 
           <div className="text-center">
-            <Button asChild size="lg" variant="outline">
+            <Button asChild size="lg" variant="outline" className="btn-hover">
               <Link href="/imoveis">{t.viewAllProperties}</Link>
             </Button>
           </div>
@@ -81,38 +90,38 @@ export function HomeClient({ featuredProperties }: HomeClientProps) {
       </section>
 
       {/* About Section */}
-      <section className="py-16 md:py-24 bg-muted">
+      <section className="py-20 md:py-28 bg-muted section-fade">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance">{t.whyChooseTitle}</h2>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-balance text-foreground">{t.whyChooseTitle}</h2>
               <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
                 {t.whyChooseDescription}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary text-secondary-foreground">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted text-primary hover:scale-110 transition-all duration-200">
                   <Award className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold">{t.experienceTitle}</h3>
+                <h3 className="text-xl font-semibold text-foreground">{t.experienceTitle}</h3>
                 <p className="text-muted-foreground leading-relaxed">{t.experienceDescription}</p>
               </div>
 
               <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary text-secondary-foreground">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted text-primary hover:scale-110 transition-all duration-200">
                   <Home className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold">{t.varietyTitle}</h3>
+                <h3 className="text-xl font-semibold text-foreground">{t.varietyTitle}</h3>
                 <p className="text-muted-foreground leading-relaxed">{t.varietyDescription}</p>
               </div>
 
               <div className="text-center space-y-4">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary text-secondary-foreground">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted text-primary hover:scale-110 transition-all duration-200">
                   <Users className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-semibold">{t.serviceTitle}</h3>
+                <h3 className="text-xl font-semibold text-foreground">{t.serviceTitle}</h3>
                 <p className="text-muted-foreground leading-relaxed">{t.serviceDescription}</p>
               </div>
             </div>
@@ -121,18 +130,18 @@ export function HomeClient({ featuredProperties }: HomeClientProps) {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-secondary text-secondary-foreground">
+      <section className="py-20 md:py-28 bg-muted section-fade">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold text-balance">{t.ctaTitle}</h2>
-            <p className="text-lg text-secondary-foreground/90 text-pretty leading-relaxed">
+            <h2 className="text-3xl md:text-4xl font-bold text-balance text-foreground">{t.ctaTitle}</h2>
+            <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
               {t.ctaDescription}
             </p>
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="gap-2 bg-secondary-foreground text-secondary hover:bg-secondary-foreground/90"
+              variant="default"
+              className="gap-2 btn-hover"
             >
               <a
                 href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(t.whatsappContactForm)}`}

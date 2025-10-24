@@ -26,7 +26,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
   }
 
   return (
-    <Card className="overflow-hidden group hover:shadow-lg transition-shadow duration-300">
+    <Card className="overflow-hidden group card-hover">
       <div className="relative h-64 overflow-hidden">
         <Image
           src={property.fotos[0] || "/placeholder.svg"}

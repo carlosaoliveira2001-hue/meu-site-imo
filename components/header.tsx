@@ -17,31 +17,31 @@ export function Header() {
   const whatsappMessage = t.whatsappGreeting
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b shadow-md bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-primary">
-              Team<span className="text-secondary">Concept</span>
+            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Team<span className="text-primary">Concept</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link href="/" className="text-sm font-medium transition-colors hover:text-primary">
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/" className="text-sm font-medium nav-link-hover text-foreground hover:text-primary">
               {t.home}
             </Link>
-            <Link href="/imoveis" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link href="/imoveis" className="text-sm font-medium nav-link-hover text-foreground hover:text-primary">
               {t.properties}
             </Link>
-            <Link href="/contato" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link href="/contato" className="text-sm font-medium nav-link-hover text-foreground hover:text-primary">
               {t.contact}
             </Link>
           </nav>
 
           <div className="hidden md:flex items-center space-x-2">
             <LanguageSwitcher />
-            <Button asChild variant="default" className="gap-2">
+            <Button asChild variant="default" className="gap-2 btn-hover">
               <a
                 href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`}
                 target="_blank"
@@ -61,31 +61,31 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-4">
+          <div className="md:hidden py-6 space-y-4 border-t bg-background/80">
             <Link
               href="/"
-              className="block text-sm font-medium transition-colors hover:text-primary"
+              className="block text-sm font-medium nav-link-hover text-foreground hover:text-primary py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.home}
             </Link>
             <Link
               href="/imoveis"
-              className="block text-sm font-medium transition-colors hover:text-primary"
+              className="block text-sm font-medium nav-link-hover text-foreground hover:text-primary py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.properties}
             </Link>
             <Link
               href="/contato"
-              className="block text-sm font-medium transition-colors hover:text-primary"
+              className="block text-sm font-medium nav-link-hover text-foreground hover:text-primary py-2"
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.contact}
             </Link>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-4">
               <LanguageSwitcher />
-              <Button asChild variant="default" className="flex-1 gap-2">
+              <Button asChild variant="default" className="flex-1 gap-2 btn-hover">
                 <a
                   href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`}
                   target="_blank"
