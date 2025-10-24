@@ -4,7 +4,7 @@ import sharp from "sharp"
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("[v0] Upload API (Supabase Storage) called")
+    console.log("[v0] Upload Crop API called")
 
     const formData = await request.formData()
     const file = formData.get("file") as File
@@ -42,34 +42,20 @@ export async function POST(request: NextRequest) {
 
     let processedBuffer: Buffer
 
-    // Check if image needs resizing
-    if (metadata.width! > standardWidth || metadata.height! > standardHeight) {
-      console.log("[v0] Image needs resizing")
-
-      // Resize image maintaining aspect ratio, but fit within standard dimensions
-      processedBuffer = await sharp(buffer)
-        .resize(standardWidth, standardHeight, {
-          fit: 'inside',
-          withoutEnlargement: true
-        })
-        .jpeg({ quality: 85 })
-        .toBuffer()
-    } else {
-      // Image is already within standard size, just convert to JPEG if needed
-      if (file.type !== 'image/jpeg') {
-        processedBuffer = await sharp(buffer)
-          .jpeg({ quality: 85 })
-          .toBuffer()
-      } else {
-        processedBuffer = buffer
-      }
-    }
+    // Always resize to standard dimensions maintaining aspect ratio
+    processedBuffer = await sharp(buffer)
+      .resize(standardWidth, standardHeight, {
+        fit: 'cover',
+        position: 'center'
+      })
+      .jpeg({ quality: 85 })
+      .toBuffer()
 
     const supabase = await createClient()
 
     // Upload to Supabase Storage with a unique filename
     const filename = `properties/${Date.now()}-${file.name.replace(/\.[^/.]+$/, "")}.jpg`
-    console.log("[v0] Uploading to Supabase Storage:", filename)
+    console.log("[v0] Uploading cropped image to Supabase Storage:", filename)
 
     const { data, error } = await supabase.storage
       .from("property-images")
@@ -94,10 +80,10 @@ export async function POST(request: NextRequest) {
       size: processedBuffer.length,
       type: 'image/jpeg',
       originalSize: file.size,
-      resized: metadata.width! > standardWidth || metadata.height! > standardHeight,
+      cropped: true,
     })
   } catch (error) {
-    console.error("[v0] Upload error:", error)
+    console.error("[v0] Upload crop error:", error)
 
     let errorMessage = "Upload failed"
     if (error instanceof Error) {

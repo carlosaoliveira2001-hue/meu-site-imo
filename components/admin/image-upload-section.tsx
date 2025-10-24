@@ -6,10 +6,12 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Loader2, Upload, X, ImageIcon } from "lucide-react"
+import { Loader2, Upload, X, ImageIcon, Crop } from "lucide-react"
 import { fetchPropertyForAdmin } from "@/lib/admin-actions"
 import { addPropertyImage, deletePropertyImage } from "@/lib/properties-actions"
 import { Card } from "@/components/ui/card"
+import { ImageCropper } from "@/components/ui/image-cropper"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 interface ImageUploadSectionProps {
   propertyId: string
@@ -19,6 +21,9 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
   const [images, setImages] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [cropDialogOpen, setCropDialogOpen] = useState(false)
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null)
+  const [largeImageDetected, setLargeImageDetected] = useState(false)
 
   const loadImages = async () => {
     setLoading(true)
@@ -58,47 +63,31 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      console.log("[v0] Uploading file:", file.name, "Size:", file.size)
-      
-      const formData = new FormData()
-      formData.append("file", file)
+      console.log("[v0] Processing file:", file.name, "Size:", file.size)
 
-      try {
-        // Upload to Blob storage
-        console.log("[v0] Sending request to /api/upload")
-        const uploadResponse = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
+      // Check if image is too large for standard upload
+      const img = new Image()
+      const imageUrl = URL.createObjectURL(file)
 
-        console.log("[v0] Upload response status:", uploadResponse.status)
-        
-        if (!uploadResponse.ok) {
-          const errorText = await uploadResponse.text()
-          console.error("[v0] Upload failed:", errorText)
-          continue
+      await new Promise((resolve) => {
+        img.onload = () => {
+          resolve(null)
         }
+        img.src = imageUrl
+      })
 
-        const uploadData = await uploadResponse.json()
-        console.log("[v0] Upload data received:", uploadData)
+      const isLargeImage = img.width > 1200 || img.height > 675
 
-        if (uploadData.url) {
-          console.log("[v0] Adding image to database with URL:", uploadData.url)
-          // Add image to database
-          const orderIndex = images.length + i
-          const result = await addPropertyImage(propertyId, uploadData.url, orderIndex)
-          
-          if (result.error) {
-            console.error("[v0] Error adding image to database:", result.error)
-          } else {
-            console.log("[v0] Image added to database successfully")
-          }
-        } else {
-          console.error("[v0] No URL received from upload")
-        }
-      } catch (error) {
-        console.error("[v0] Error uploading image:", error)
+      if (isLargeImage) {
+        console.log("[v0] Large image detected, opening crop dialog")
+        setImageToCrop(imageUrl)
+        setLargeImageDetected(true)
+        setCropDialogOpen(true)
+        setUploading(false)
+        return // Stop processing other files until crop is complete
       }
+
+      await uploadFile(file, i)
     }
 
     console.log("[v0] Reloading images...")
@@ -108,6 +97,72 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
     // Reset input
     e.target.value = ""
     console.log("[v0] Upload process completed")
+  }
+
+  const uploadFile = async (file: File, index: number) => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      console.log("[v0] Sending request to /api/upload")
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      console.log("[v0] Upload response status:", uploadResponse.status)
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text()
+        console.error("[v0] Upload failed:", errorText)
+        return
+      }
+
+      const uploadData = await uploadResponse.json()
+      console.log("[v0] Upload data received:", uploadData)
+
+      if (uploadData.url) {
+        console.log("[v0] Adding image to database with URL:", uploadData.url)
+        // Add image to database
+        const orderIndex = images.length + index
+        const result = await addPropertyImage(propertyId, uploadData.url, orderIndex)
+
+        if (result.error) {
+          console.error("[v0] Error adding image to database:", result.error)
+        } else {
+          console.log("[v0] Image added to database successfully")
+        }
+      } else {
+        console.error("[v0] No URL received from upload")
+      }
+    } catch (error) {
+      console.error("[v0] Error uploading image:", error)
+    }
+  }
+
+  const handleCropComplete = async (croppedImageBlob: Blob) => {
+    console.log("[v0] Crop completed, uploading cropped image")
+    if (imageToCrop) {
+      URL.revokeObjectURL(imageToCrop)
+    }
+    setCropDialogOpen(false)
+    setImageToCrop(null)
+    setLargeImageDetected(false)
+
+    const croppedFile = new File([croppedImageBlob], "cropped-image.jpg", { type: "image/jpeg" })
+    await uploadFile(croppedFile, images.length)
+    await loadImages()
+  }
+
+  const handleCropCancel = () => {
+    console.log("[v0] Crop cancelled")
+    if (imageToCrop) {
+      URL.revokeObjectURL(imageToCrop)
+    }
+    setCropDialogOpen(false)
+    setImageToCrop(null)
+    setLargeImageDetected(false)
+    setUploading(false)
   }
 
   const handleDeleteImage = async (imageId: string, imageUrl: string) => {
@@ -140,7 +195,10 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
     <div className="space-y-4">
       <div>
         <Label>Imagens do Imóvel</Label>
-        <p className="text-sm text-muted-foreground">Adicione fotos do imóvel. A primeira imagem será a capa.</p>
+        <p className="text-sm text-muted-foreground">
+          Adicione fotos do imóvel. A primeira imagem será a capa.
+          Imagens maiores que 1200x675 pixels serão automaticamente redimensionadas ou você poderá cortá-las.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -201,6 +259,17 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
           <p className="text-sm text-muted-foreground">Nenhuma imagem adicionada ainda.</p>
           <p className="text-xs text-muted-foreground">Clique no botão acima para adicionar imagens.</p>
         </div>
+      )}
+
+      {cropDialogOpen && imageToCrop && (
+        <ImageCropper
+          imageSrc={imageToCrop}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+          aspect={16 / 9}
+          maxWidth={1200}
+          maxHeight={675}
+        />
       )}
     </div>
   )
