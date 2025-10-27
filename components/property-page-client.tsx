@@ -14,7 +14,7 @@ import { translations } from "@/lib/i18n/translations"
 import { formatPrice, type PropertyForDisplay } from "@/lib/properties-helpers"
 import { Layers, ArrowUpDown, Eye, Search } from "lucide-react"
 import { useState } from "react"
-import { Ruler, Euro, Building2, Award } from "lucide-react"
+import { Euro, Award } from "lucide-react"
 
 interface PropertyPageClientProps {
   property: PropertyForDisplay
@@ -388,12 +388,10 @@ export function PropertyPageClient({ property, similarProperties }: PropertyPage
         {/* Similar Properties */}
         {similarProperties.length > 0 && (
           <div className="mt-16">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-balance">{t.similarProperties}</h2>
-            <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory">
-              {similarProperties.map((property) => (
-                <div key={property.id} className="flex-shrink-0 w-80 snap-start">
-                  <PropertyCard property={property} />
-                </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8 text-balance">Também lhe pode interessar</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
+              {similarProperties.slice(0, 3).map((property) => (
+                <PropertyCard key={property.id} property={property} compact />
               ))}
             </div>
           </div>

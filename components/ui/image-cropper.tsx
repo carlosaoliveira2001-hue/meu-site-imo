@@ -38,7 +38,7 @@ export function ImageCropper({
   const getCroppedImg = async (
     image: HTMLImageElement,
     crop: PixelCrop,
-    scale: number
+    _scale: number
   ): Promise<Blob> => {
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")

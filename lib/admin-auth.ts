@@ -1,13 +1,10 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { createClient } from "@/lib/supabase/server"
 
 const ADMIN_SESSION_COOKIE = "admin_session"
 
 export async function adminLogin(username: string, password: string) {
-  const supabase = await createClient()
-
   // Simple authentication - check if username is "admin" and password is "admin"
   // In production, you should use proper password hashing
   if (username === "admin" && password === "admin") {

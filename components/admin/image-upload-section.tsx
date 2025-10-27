@@ -1,17 +1,13 @@
 "use client"
 
-import type React from "react"
-
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Loader2, Upload, X, ImageIcon, Crop } from "lucide-react"
+import { Loader2, Upload, X, ImageIcon } from "lucide-react"
 import { fetchPropertyForAdmin } from "@/lib/admin-actions"
 import { addPropertyImage, deletePropertyImage } from "@/lib/properties-actions"
 import { Card } from "@/components/ui/card"
-import { ImageCropper } from "@/components/ui/image-cropper"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 interface ImageUploadSectionProps {
   propertyId: string
@@ -21,9 +17,6 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
   const [images, setImages] = useState<any[]>([])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [cropDialogOpen, setCropDialogOpen] = useState(false)
-  const [imageToCrop, setImageToCrop] = useState<string | null>(null)
-  const [largeImageDetected, setLargeImageDetected] = useState(false)
 
   const loadImages = async () => {
     setLoading(true)
@@ -64,28 +57,6 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       console.log("[v0] Processing file:", file.name, "Size:", file.size)
-
-      // Check if image is too large for standard upload
-      const img = new Image()
-      const imageUrl = URL.createObjectURL(file)
-
-      await new Promise((resolve) => {
-        img.onload = () => {
-          resolve(null)
-        }
-        img.src = imageUrl
-      })
-
-      const isLargeImage = img.width > 1200 || img.height > 675
-
-      if (isLargeImage) {
-        console.log("[v0] Large image detected, opening crop dialog")
-        setImageToCrop(imageUrl)
-        setLargeImageDetected(true)
-        setCropDialogOpen(true)
-        setUploading(false)
-        return // Stop processing other files until crop is complete
-      }
 
       await uploadFile(file, i)
     }
@@ -140,31 +111,6 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
     }
   }
 
-  const handleCropComplete = async (croppedImageBlob: Blob) => {
-    console.log("[v0] Crop completed, uploading cropped image")
-    if (imageToCrop) {
-      URL.revokeObjectURL(imageToCrop)
-    }
-    setCropDialogOpen(false)
-    setImageToCrop(null)
-    setLargeImageDetected(false)
-
-    const croppedFile = new File([croppedImageBlob], "cropped-image.jpg", { type: "image/jpeg" })
-    await uploadFile(croppedFile, images.length)
-    await loadImages()
-  }
-
-  const handleCropCancel = () => {
-    console.log("[v0] Crop cancelled")
-    if (imageToCrop) {
-      URL.revokeObjectURL(imageToCrop)
-    }
-    setCropDialogOpen(false)
-    setImageToCrop(null)
-    setLargeImageDetected(false)
-    setUploading(false)
-  }
-
   const handleDeleteImage = async (imageId: string, imageUrl: string) => {
     try {
       // Delete from Blob storage
@@ -197,7 +143,7 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
         <Label>Imagens do Imóvel</Label>
         <p className="text-sm text-muted-foreground">
           Adicione fotos do imóvel. A primeira imagem será a capa.
-          Imagens maiores que 1200x675 pixels serão automaticamente redimensionadas ou você poderá cortá-las.
+          Imagens maiores que 1200x675 pixels serão automaticamente redimensionadas.
         </p>
       </div>
 
@@ -259,17 +205,6 @@ export function ImageUploadSection({ propertyId }: ImageUploadSectionProps) {
           <p className="text-sm text-muted-foreground">Nenhuma imagem adicionada ainda.</p>
           <p className="text-xs text-muted-foreground">Clique no botão acima para adicionar imagens.</p>
         </div>
-      )}
-
-      {cropDialogOpen && imageToCrop && (
-        <ImageCropper
-          imageSrc={imageToCrop}
-          onCropComplete={handleCropComplete}
-          onCancel={handleCropCancel}
-          aspect={16 / 9}
-          maxWidth={1200}
-          maxHeight={675}
-        />
       )}
     </div>
   )

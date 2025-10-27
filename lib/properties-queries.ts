@@ -68,7 +68,7 @@ export async function getProperties() {
     }
 
     return { properties: data || [], error: null, usingFallback: false }
-  } catch (err) {
+  } catch {
     console.log("[v0] Database error, using static data as fallback")
     return {
       properties: staticProperties.map(convertStaticToDbFormat),
@@ -158,7 +158,7 @@ export async function getProperty(id: string) {
     }
 
     return { property: data, error: null, usingFallback: false }
-  } catch (err) {
+  } catch {
     console.log("[v0] Database error, using static data as fallback")
     const staticProperty = staticProperties.find((p) => p.id === id)
     if (staticProperty) {

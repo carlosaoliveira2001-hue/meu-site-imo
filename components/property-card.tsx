@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Maximize, Bed, Bath, Car } from "lucide-react"
+import { MapPin, Maximize, Bed, Bath, Car, Heart } from "lucide-react"
 import { type Property, formatPrice } from "@/lib/properties-data"
 import type { PropertyForDisplay } from "@/lib/properties-helpers"
 import { useLanguage } from "@/lib/i18n/language-context"
@@ -15,7 +15,12 @@ interface PropertyCardProps {
   property: Property | PropertyForDisplay
 }
 
-export function PropertyCard({ property }: PropertyCardProps) {
+interface PropertyCardProps {
+  property: Property | PropertyForDisplay
+  compact?: boolean
+}
+
+export function PropertyCard({ property, compact = false }: PropertyCardProps) {
   const { locale } = useLanguage()
   const t = translations[locale]
 
@@ -23,6 +28,60 @@ export function PropertyCard({ property }: PropertyCardProps) {
     casa: t.propertyTypes.house,
     apartamento: t.propertyTypes.apartment,
     terreno: t.propertyTypes.land,
+  }
+
+  if (compact) {
+    return (
+      <Card className="w-full max-w-sm overflow-hidden group card-hover">
+        <Link href={`/imoveis/${property.id}`} className="block">
+          <div className="relative h-48 overflow-hidden">
+            <Image
+              src={property.fotos[0] || "/placeholder.svg"}
+              alt={property.titulo[locale]}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground text-xs px-2 py-1">
+              {propertyTypeLabels[property.tipo]}
+            </Badge>
+            <button className="absolute top-3 right-3 p-2 bg-white/80 hover:bg-white rounded-full transition-all duration-200 opacity-0 group-hover:opacity-100">
+              <Heart className="h-5 w-5 text-gray-600" />
+            </button>
+          </div>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-semibold text-balance line-clamp-1 mb-1">{property.titulo[locale]}</h3>
+            <div className="text-sm text-muted-foreground mb-2">
+              {property.freguesia}, {property.concelho}
+            </div>
+            <div className="text-xl font-bold text-primary mb-2">{formatPrice(property.preco)}</div>
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Maximize className="h-4 w-4" />
+                <span>{property.area}m²</span>
+              </div>
+              {property.quartos && (
+                <div className="flex items-center gap-1">
+                  <Bed className="h-4 w-4" />
+                  <span>{property.quartos}</span>
+                </div>
+              )}
+              {property.banheiros && (
+                <div className="flex items-center gap-1">
+                  <Bath className="h-4 w-4" />
+                  <span>{property.banheiros}</span>
+                </div>
+              )}
+              {property.vagas && (
+                <div className="flex items-center gap-1">
+                  <Car className="h-4 w-4" />
+                  <span>{property.vagas}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Link>
+      </Card>
+    )
   }
 
   return (

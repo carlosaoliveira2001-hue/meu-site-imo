@@ -14,7 +14,7 @@ export function ShareButton() {
           title: document.title,
           url: window.location.href,
         })
-      } catch (error) {
+      } catch {
         // User cancelled share
       }
     } else {
@@ -25,7 +25,7 @@ export function ShareButton() {
           title: "Link copiado!",
           description: "O link foi copiado para a área de transferência.",
         })
-      } catch (error) {
+      } catch {
         toast({
           title: "Erro",
           description: "Não foi possível copiar o link.",
